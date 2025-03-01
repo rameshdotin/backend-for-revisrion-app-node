@@ -21,15 +21,18 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			unique: true,
 			required: true,
-			// Basic regex validation for email format
 			match: [/^\S+@\S+\.\S+$/, "Please use a valid email address."],
 		},
 		password: {
 			type: String,
 			required: true,
-			select: false, // Never return password in queries
 			minlength: [6, "Password must be at least 6 characters long."],
 		},
+		avatar: {
+			type: String,
+			required: true,
+			default: "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
+		}
 	},
 	{ timestamps: true }
 );
@@ -37,7 +40,6 @@ const userSchema = new mongoose.Schema(
 // Password hashing middleware
 userSchema.pre("save", async function (next) {
 	if (!this.isModified("password")) return next();
-
 	try {
 		const salt = await bcrypt.genSalt(10);
 		this.password = await bcrypt.hash(this.password, salt);
@@ -48,11 +50,11 @@ userSchema.pre("save", async function (next) {
 });
 
 // JWT generation method
-userSchema.methods.generateJWT = function () {
+userSchema.methods.generateJWT = function (Days) {
 	return jwt.sign(
 		{ id: this._id },
 		JWT_SECRET,
-		{ expiresIn: "7d" }
+		{ expiresIn: Days }
 	);
 };
 

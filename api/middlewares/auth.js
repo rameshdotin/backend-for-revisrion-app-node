@@ -17,8 +17,8 @@ export const authenticate = async (req, res, next) => {
 		if (!user) {
 			throw new Error("User not found");
 		}
-
-		req.user = user;
+		const { password: pass, ...rest } = user._doc;
+		req.user = rest;
 		next();
 	} catch (err) {
 		res.status(400).send("ERROR: " + err.message);
